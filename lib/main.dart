@@ -1,5 +1,6 @@
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
+import '../Styles.dart';
 import 'package:sudoku2/widgets/home_page.dart';
 
 void main() {
@@ -34,19 +35,32 @@ class _MyAppState extends State<MyApp> {
       title: "Sudoku 2.0",
       home: Scaffold(
         appBar: AppBar(
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 10),
+              child: IconButton(
+                icon: Icon(Icons.settings),
+                color: Colors.white,
+                onPressed: (){
+                  print("Settings activated");
+                },
+              ),
+            )
+          ],
+          backgroundColor: Styles.themeColor,
           title: Text("SuDoKu"),
           centerTitle: true,
         ),
         body: listOfPages[selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          showSelectedLabels: true,
+          showSelectedLabels: false,
           showUnselectedLabels: false,
           selectedItemColor: Colors.blueGrey,
           unselectedItemColor: Colors.black,
           currentIndex: selectedIndex,
           onTap: onBottomNavigationTapHandler,
-          items: [
+          items: const [
             BottomNavigationBarItem(
                 icon: Icon(FluentSystemIcons.ic_fluent_home_regular),
                 activeIcon: Icon(FluentSystemIcons.ic_fluent_home_filled),
