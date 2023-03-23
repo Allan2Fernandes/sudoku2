@@ -37,7 +37,6 @@ class _GamePageState extends State<GamePage> {
 
   void addTime(){
     final addSeconds = 1;
-
     setState(() {
       final seconds = durationCounter.inSeconds + addSeconds;
       durationCounter = Duration(seconds: seconds);
