@@ -20,11 +20,11 @@ class _GamePageState extends State<GamePage> {
   int numMistakes = 0;
   int currentlySelectedRowIndex = 0;
   int currentlySelectedColumnIndex = 0;
+  String currentlySelectedNumber = "0";
   GameGenerator gameGenerator = GameGenerator();
 
   _GamePageState(){
     gameElementStates = gameGenerator.getGameBoard();
-
     isCorrectValueAtIndex = List.generate(9, (rowIndex) =>
         List.generate(9, (columnIndex)=> true)
     );
@@ -52,12 +52,12 @@ class _GamePageState extends State<GamePage> {
 
   TextStyle getBoardTextStyle(int rowIndex, int columnIndex){
     double fontSize = 25;
-    if(gameGenerator.originalValues![rowIndex][columnIndex] == true){
+    if(gameGenerator.originalValues![rowIndex][columnIndex] == true){ //Color the original values black
       return TextStyle(color: Colors.black, fontSize: fontSize);
     }else{
-      if(isCorrectValueAtIndex![rowIndex][columnIndex] == true){
+      if(isCorrectValueAtIndex![rowIndex][columnIndex] == true){ //Color the correct values green
         return TextStyle(color: Colors.green, fontSize: fontSize);
-      }else{
+      }else{                                                    //Color the wrongly inputted values red
         return TextStyle(color: Colors.red, fontSize: fontSize);
       }
     }
@@ -87,7 +87,6 @@ class _GamePageState extends State<GamePage> {
         ){
           isCorrectValueAtIndex![currentlySelectedRowIndex][currentlySelectedColumnIndex] = false;
           numMistakes++;
-          print(numMistakes);
         }else{
           isCorrectValueAtIndex![currentlySelectedRowIndex][currentlySelectedColumnIndex] = true;
         }
@@ -98,15 +97,24 @@ class _GamePageState extends State<GamePage> {
   ButtonStyle getButtonStyle(int rowIndex, int columnIndex){
     int subGridRow = (currentlySelectedRowIndex/3).floor();
     int subGridColumn = (currentlySelectedColumnIndex/3).floor();
+    Color selectedCellColor = const Color(0xFFb1bab3);
+    Color commonGridRowColumnColor = Color(0xFFebf7ee);
+    Color sudokuBoardBackgroundColor = Colors.white;
+    //Get the number in the cell
+    String cellNumber = gameElementStates![rowIndex][columnIndex];
+    if(cellNumber == currentlySelectedNumber){
+      //Return a certain style
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFF376dc4)));
+    }
     if(rowIndex == currentlySelectedRowIndex && columnIndex == currentlySelectedColumnIndex){
-      return const ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFFb1bab3)));
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(selectedCellColor));
     } else if((rowIndex == currentlySelectedRowIndex && columnIndex != currentlySelectedColumnIndex) || (rowIndex != currentlySelectedRowIndex && columnIndex == currentlySelectedColumnIndex)){ //Same row or column
-      return const ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFFebf7ee)));
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(commonGridRowColumnColor));
     }else if((rowIndex/3).floor() == subGridRow && (columnIndex/3).floor() == subGridColumn) { //Same subgrid
-      return const ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFFebf7ee)));
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(commonGridRowColumnColor));
     }
     else{
-      return const ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white));
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(sudokuBoardBackgroundColor));
     }
   }
 
@@ -134,7 +142,7 @@ class _GamePageState extends State<GamePage> {
         children: [
           //First Row for time and pausing the game
           Padding(
-            padding: EdgeInsets.only(left: 30, top: 10, right: 15),
+            padding: const EdgeInsets.only(left: 30, top: 10, right: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -177,6 +185,8 @@ class _GamePageState extends State<GamePage> {
                               onPressed: (){
                                 //print("Row is ${rowIndex} and column is ${columnIndex}");
                                 updateCurrentlySelectedIndices(rowIndex, columnIndex);
+                                String selectedNumber = gameElementStates![rowIndex][columnIndex];
+                                currentlySelectedNumber = selectedNumber;
                               },
                               child: Text(gameElementStates![rowIndex][columnIndex], style: getBoardTextStyle(rowIndex, columnIndex),),
                               style: getButtonStyle(rowIndex, columnIndex),
