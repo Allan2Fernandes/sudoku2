@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:sudoku2/difficulty_level.dart';
 
 class GameGenerator{
   List<List<String>>? gameBoard;
@@ -16,8 +17,21 @@ class GameGenerator{
     fetchBoardFromAPI();
   }
 
+  String getRankFromMode(){
+    if(DifficultyLevel.setDifficulty == 'Easy'){
+      return "25";
+    }else if(DifficultyLevel.setDifficulty == 'Medium'){
+      return "75";
+    }else if(DifficultyLevel.setDifficulty == "Hard"){
+      return "125";
+    }
+    return "0";
+  }
+
+
   Future<void> fetchBoardFromAPI() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/SudokuGenerator/200'));
+    String rank = getRankFromMode();
+    final response = await http.get(Uri.parse('http://10.0.2.2:8000/SudokuGenerator/$rank'));
     boardAsString = jsonDecode(response.body)['board'];
     convertStringToGameBoard();
   }

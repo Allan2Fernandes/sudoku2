@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku2/Styles.dart';
+import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/game_generator.dart';
 
 
@@ -15,14 +16,16 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   List<List<String>>? gameElementStates;
   List<List<bool>>? isCorrectValueAtIndex;
-  Duration durationCounter = Duration();
+  Duration durationCounter = const Duration();
+  String durationString = "00:00";
   Timer? timer;
   int numMistakes = 0;
   int currentlySelectedRowIndex = 0;
   int currentlySelectedColumnIndex = 0;
   String currentlySelectedNumber = "0";
-  GameGenerator gameGenerator = GameGenerator();
-
+  bool timerIsPaused = false;
+  GameGenerator gameGenerator= GameGenerator();
+  int numVacancies = 0;
   _GamePageState(){
     gameElementStates = gameGenerator.getGameBoard();
     isCorrectValueAtIndex = List.generate(9, (rowIndex) =>
@@ -32,14 +35,55 @@ class _GamePageState extends State<GamePage> {
   }
 
   void startTimer(){
-    timer = Timer.periodic(Duration(seconds: 1), (timer) => { addTime()});
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) => { addTime()});
   }
 
   void addTime(){
-    final addSeconds = 1;
+    const addSeconds = 1;
     setState(() {
-      final seconds = durationCounter.inSeconds + addSeconds;
-      durationCounter = Duration(seconds: seconds);
+      //Logic
+      if(timerIsPaused == false){
+        final seconds = durationCounter.inSeconds + addSeconds;
+        durationCounter = Duration(seconds: seconds);
+      }
+
+      //Formatting the string
+      int numberOfMinutes = (durationCounter.inSeconds/60).floor();
+      int numberOfSeconds = durationCounter.inSeconds%60;
+      String numMinutesString = "00";
+      String numSecondsString = "00";
+      if(numberOfMinutes<10){
+        numMinutesString = "0$numberOfMinutes";
+      }else{
+        numMinutesString = numberOfMinutes.toString();
+      }
+      if(numberOfSeconds<10){
+        numSecondsString = "0$numberOfSeconds";
+      }else{
+        numSecondsString = numberOfSeconds.toString();
+      }
+      durationString = "$numMinutesString:$numSecondsString";
+    });
+  }
+
+  void countNumVacancies(){
+    setState(() {
+      int vacancies = 0;
+      for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 9; j++){
+          if(gameElementStates![i][j] == ""){
+            vacancies++;
+          }
+        }
+      }
+      numVacancies = vacancies;
+      print(numVacancies);
+    });
+  }
+
+  void changeTimerIsPausedState(){
+    setState(() {
+      timerIsPaused = !timerIsPaused;
     });
   }
 
@@ -50,8 +94,18 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
+  Icon getPausePlayIcon(){
+    if(timerIsPaused){
+      return const Icon(Icons.play_arrow, size: 20, color: Styles.topRowTextColor,);
+    }else{
+      return const Icon(Icons.pause, size: 20, color: Styles.topRowTextColor,);
+    }
+  }
+
   TextStyle getBoardTextStyle(int rowIndex, int columnIndex){
     double fontSize = 25;
+
+    //If not paused, find the right background
     if(gameGenerator.originalValues![rowIndex][columnIndex] == true){ //Color the original values black
       return TextStyle(color: Colors.black, fontSize: fontSize);
     }else{
@@ -95,16 +149,22 @@ class _GamePageState extends State<GamePage> {
   }
 
   ButtonStyle getButtonStyle(int rowIndex, int columnIndex){
+    //If the button is paused, always show white
+    if(timerIsPaused){
+      return const ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white));
+    }
+
     int subGridRow = (currentlySelectedRowIndex/3).floor();
     int subGridColumn = (currentlySelectedColumnIndex/3).floor();
     Color selectedCellColor = const Color(0xFFb1bab3);
-    Color commonGridRowColumnColor = Color(0xFFebf7ee);
+    Color commonGridRowColumnColor = const Color(0xFFebf7ee);
     Color sudokuBoardBackgroundColor = Colors.white;
+    Color selectedNumbersColor = const Color(0xFF376dc4);
     //Get the number in the cell
     String cellNumber = gameElementStates![rowIndex][columnIndex];
-    if(cellNumber == currentlySelectedNumber){
+    if(cellNumber == currentlySelectedNumber && currentlySelectedNumber != ""){
       //Return a certain style
-      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFF376dc4)));
+      return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(selectedNumbersColor));
     }
     if(rowIndex == currentlySelectedRowIndex && columnIndex == currentlySelectedColumnIndex){
       return ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(selectedCellColor));
@@ -118,21 +178,29 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  String getElementStatesIfPaused(int rowIndex, int columnIndex){
+    if(timerIsPaused){
+      return "";
+    }else{
+      return gameElementStates![rowIndex][columnIndex];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Styles.themeColor,
-        title: Text("SuDoKu"),
+        title: const Text("SuDoKu"),
         centerTitle: true,
         actions: [
           Container(
-            margin: EdgeInsets.only(right: 10),
+            margin: const EdgeInsets.only(right: 10),
             child: IconButton(
               onPressed: (){
                 print("Opening settings");
               },
-              icon: Icon(Icons.settings),
+              icon: const Icon(Icons.settings),
             ),
           )
         ],
@@ -146,15 +214,15 @@ class _GamePageState extends State<GamePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Easy Mode", style: Styles.topRowTextStyles,),
-                Text("Mistakes: ${numMistakes}", style: Styles.topRowTextStyles,),
-                Container(
-                  child: Row(
-                    children: [
-                      Text("${(durationCounter.inSeconds).floor()}", style: Styles.topRowTextStyles,),
-                      IconButton(onPressed: (){}, icon: Icon(Icons.pause, size: 20, color: Styles.topRowTextColor,))
-                    ],
-                  ),
+                Text(DifficultyLevel.setDifficulty, style: Styles.topRowTextStyles,),
+                Text("Mistakes: $numMistakes", style: Styles.topRowTextStyles,),
+                Row(
+                  children: [
+                    Text(durationString, style: Styles.topRowTextStyles,),
+                    IconButton(onPressed: (){
+                      changeTimerIsPausedState();
+                    }, icon: getPausePlayIcon())
+                  ],
                 ),
               ],
             ),
@@ -169,32 +237,30 @@ class _GamePageState extends State<GamePage> {
             ),
             child: Stack(
               children: [
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(9, (columnIndex) =>
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(9, (rowIndex) => Container(
-                            // decoration: BoxDecoration(
-                            //     border: Border.all(width: 1, color: Colors.grey)
-                            // ),
-                            height: (MediaQuery.of(context).size.width-50)/9-1,
-                            width: (MediaQuery.of(context).size.width-50)/9-1,
-                            child: TextButton(
-                              onPressed: (){
-                                //print("Row is ${rowIndex} and column is ${columnIndex}");
-                                updateCurrentlySelectedIndices(rowIndex, columnIndex);
-                                String selectedNumber = gameElementStates![rowIndex][columnIndex];
-                                currentlySelectedNumber = selectedNumber;
-                              },
-                              child: Text(gameElementStates![rowIndex][columnIndex], style: getBoardTextStyle(rowIndex, columnIndex),),
-                              style: getButtonStyle(rowIndex, columnIndex),
-                            ),
-                          )
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(9, (columnIndex) =>
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(9, (rowIndex) => SizedBox(
+                          // decoration: BoxDecoration(
+                          //     border: Border.all(width: 1, color: Colors.grey)
+                          // ),
+                          height: (MediaQuery.of(context).size.width-50)/9-1,
+                          width: (MediaQuery.of(context).size.width-50)/9-1,
+                          child: TextButton(
+                            onPressed: (){
+                              //print("Row is ${rowIndex} and column is ${columnIndex}");
+                              updateCurrentlySelectedIndices(rowIndex, columnIndex);
+                              String selectedNumber = gameElementStates![rowIndex][columnIndex];
+                              currentlySelectedNumber = selectedNumber;
+                            },
+                            style: getButtonStyle(rowIndex, columnIndex),
+                            child: Text(getElementStatesIfPaused(rowIndex, columnIndex), style: getBoardTextStyle(rowIndex, columnIndex),),
                           ),
                         )
-                    ),
+                        ),
+                      )
                   ),
                 ),
               ],
@@ -202,34 +268,34 @@ class _GamePageState extends State<GamePage> {
           ),
           //Third row is buttons like erase
           Container(
-            margin: EdgeInsets.only(left: 20, right: 20),
+            margin: const EdgeInsets.only(left: 20, right: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   children: [
-                    IconButton(onPressed: (){}, icon: Icon(FluentSystemIcons.ic_fluent_arrow_undo_filled)),
-                    Text("Undo")
+                    IconButton(onPressed: (){}, icon: const Icon(FluentSystemIcons.ic_fluent_arrow_undo_filled)),
+                    const Text("Undo")
                   ],
                 ),
                 Column(
                   children: [
                     IconButton(onPressed: (){
                       eraseCurrentlySelectedElement();
-                    }, icon: Icon(FluentSystemIcons.ic_fluent_erase_filled)),
-                    Text("Erase")
+                    }, icon: const Icon(FluentSystemIcons.ic_fluent_erase_filled)),
+                    const Text("Erase")
                   ],
                 ),
                 Column(
                   children: [
-                    IconButton(onPressed: (){}, icon: Icon(FluentSystemIcons.ic_fluent_notebook_sync_filled)),
-                    Text("Notes")
+                    IconButton(onPressed: (){}, icon: const Icon(FluentSystemIcons.ic_fluent_flag_pride_filled)),
+                    const Text("Give Up")
                   ],
                 ),
                 Column(
                   children: [
-                    IconButton(onPressed: (){}, icon: Icon(FluentSystemIcons.ic_fluent_lightbulb_circle_regular)),
-                    Text("Hint")
+                    IconButton(onPressed: (){}, icon: const Icon(FluentSystemIcons.ic_fluent_lightbulb_circle_regular)),
+                    const Text("Hint")
                   ],
                 ),
               ],
@@ -237,11 +303,11 @@ class _GamePageState extends State<GamePage> {
           ),
           //Fourth row is number selection
           Padding(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             child: Container(
-              margin: EdgeInsets.only(top: 10),
+              margin: const EdgeInsets.only(top: 10),
               child: Row(
-                children: List.generate(9, (index) => Container(
+                children: List.generate(9, (index) => SizedBox(
                     width: MediaQuery.of(context).size.width/10,
                     child: TextButton(onPressed: (){
                       if(currentlySelectedRowIndex == -1 || currentlySelectedColumnIndex == -1){
@@ -249,6 +315,8 @@ class _GamePageState extends State<GamePage> {
                       }
                       int numberSelection = index+1;
                       updateElementState(numberSelection);
+                      countNumVacancies();
+                      print(numVacancies);
                     },
                         child: Text((index+1).toString(),
                           style: TextStyle(
@@ -262,8 +330,6 @@ class _GamePageState extends State<GamePage> {
                 )),
               ),
             )
-
-
         ],
       ),
 

@@ -1,10 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku2/Styles.dart';
+import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/widgets/game_page.dart';
+
+import 'difficulty_level_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
+
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -34,7 +39,7 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () { 
                       Navigator.push(
                         context, 
-                        MaterialPageRoute(builder: (context)=> const GamePage())
+                        MaterialPageRoute(builder: (context)=> const DifficultyLevelSelector())
                       );
                     },
                     child: Text("New Game", style: TextStyle(color: Colors.white),),
