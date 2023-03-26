@@ -157,7 +157,7 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                     onPressed: (){
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=> const GamePage())
+                          MaterialPageRoute(builder: (context)=> GamePage(isLoadedGame: false,))
                       );
                     },
                     style: ElevatedButton.styleFrom(

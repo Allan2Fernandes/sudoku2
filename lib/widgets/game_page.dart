@@ -1,28 +1,34 @@
 import 'dart:async';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:sudoku2/Styles.dart';
+import 'package:sudoku2/database_classes/database.dart';
+import 'package:sudoku2/database_classes/database_conversions.dart';
 import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/game_generator.dart';
 import 'package:tuple/tuple.dart';
 
 
 class GamePage extends StatefulWidget {
-  const GamePage({Key? key}) : super(key: key);
+  bool isLoadedGame;
+
+  GamePage({Key? key, required this.isLoadedGame}) : super(key: key);
 
   @override
-  State<GamePage> createState() => _GamePageState();
+  State<GamePage> createState() => _GamePageState(isLoadedGame);
 }
 
 class _GamePageState extends State<GamePage> {
-  List<List<String>>? gameElementStates;
-  List<List<String>>? solutionElementStates;
-  List<List<bool>>? isCorrectValueAtIndex;
+  List<List<String>>? gameElementStates; //Save
+  List<List<String>>? solutionElementStates; //Save
+  List<List<bool>>? originalValues; //Save
+  List<List<bool>>? isCorrectValueAtIndex; //Save
   List<Tuple2<int, int>>? ListOfMoves;
   Duration durationCounter = const Duration();
-  String durationString = "00:00";
+  String durationString = "00:00"; //Save
   Timer? timer;
-  int numMistakes = 0;
+  int numMistakes = 0; //Save
   int currentlySelectedRowIndex = 0;
   int currentlySelectedColumnIndex = 0;
   String currentlySelectedNumber = "0";
@@ -30,17 +36,25 @@ class _GamePageState extends State<GamePage> {
   bool isShowingSolution = false;
   GameGenerator gameGenerator= GameGenerator();
   int numVacancies = 0;
-  _GamePageState(){
+  bool? isLoadedGame;
+
+  //Constructor
+  _GamePageState(bool isLoadedGame){
     gameElementStates = gameGenerator.getGameBoard();
     solutionElementStates = gameGenerator.getSolutionBoard();
+    this.originalValues = gameGenerator.originalValues;
     isCorrectValueAtIndex = List.generate(9, (rowIndex) =>
         List.generate(9, (columnIndex)=> true)
     );
-    startTimer();
+    startTimer(0);
+    this.isLoadedGame = isLoadedGame;
   }
 
-  void startTimer(){
+
+
+  void startTimer(int startValue){
     timer = Timer.periodic(const Duration(seconds: 1), (timer) => { addTime()});
+    durationCounter = Duration(seconds: startValue);
   }
 
   void addTime(){
@@ -122,7 +136,7 @@ class _GamePageState extends State<GamePage> {
 
 
     //If not paused, find the right background
-    if(gameGenerator.originalValues![rowIndex][columnIndex] == true){ //Color the original values black
+    if(originalValues![rowIndex][columnIndex] == true){ //Color the original values black
       return TextStyle(color: Colors.black, fontSize: fontSize);
     }else{
       if(isShowingSolution){
@@ -142,7 +156,7 @@ class _GamePageState extends State<GamePage> {
 
   void eraseCurrentlySelectedElement(){
     setState(() {
-      if(gameGenerator.originalValues![currentlySelectedRowIndex][currentlySelectedColumnIndex] == false){
+      if(originalValues![currentlySelectedRowIndex][currentlySelectedColumnIndex] == false){
         gameElementStates![currentlySelectedRowIndex][currentlySelectedColumnIndex] = "";
       }
     });
@@ -151,7 +165,7 @@ class _GamePageState extends State<GamePage> {
 
   void updateElementState(int numberSelection){
     setState(() {
-      if(gameGenerator.originalValues![currentlySelectedRowIndex][currentlySelectedColumnIndex] == false){
+      if(originalValues![currentlySelectedRowIndex][currentlySelectedColumnIndex] == false){
         gameElementStates![currentlySelectedRowIndex][currentlySelectedColumnIndex] = numberSelection.toString();
 
         if(!gameGenerator.columnCheckPass(numberSelection, currentlySelectedColumnIndex, currentlySelectedRowIndex) ||
@@ -354,7 +368,8 @@ class _GamePageState extends State<GamePage> {
                 child: Row(
                   children: List.generate(9, (index) => SizedBox(
                       width: MediaQuery.of(context).size.width/10,
-                      child: TextButton(onPressed: (){
+                      child: TextButton(
+                        onPressed: (){
                         if(isShowingSolution){
                           return;
                         }
@@ -364,6 +379,9 @@ class _GamePageState extends State<GamePage> {
                         int numberSelection = index+1;
                         updateElementState(numberSelection);
                         countNumVacancies();
+                        print("Updating database here");
+                        DataBaseHandler dbHandler = DataBaseHandler();
+                        dbHandler.SaveGame(gameElementStates, solutionElementStates, originalValues, isCorrectValueAtIndex, durationString, DifficultyLevel.setDifficulty, numMistakes);
                       },
                           child: Text((index+1).toString(),
                             style: TextStyle(
