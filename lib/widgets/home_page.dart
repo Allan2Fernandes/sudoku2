@@ -28,21 +28,20 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 50,
-                  width: 150,
                   margin: EdgeInsets.only(bottom: 30),
-                  decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(50)),
-                      color: Styles.buttonsColor
-                  ),
-                  child: TextButton(
-                    onPressed: () { 
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context)=> const DifficultyLevelSelector())
-                      );
-                    },
-                    child: Text("New Game", style: TextStyle(color: Colors.white),),
+                  child: ElevatedButton(
+                      onPressed: (){
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context)=> const DifficultyLevelSelector())
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(150, 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        backgroundColor: Styles.buttonsColor,
+                      ),
+                      child: Text("New Game")
                   ),
                 ),
               ],
@@ -52,17 +51,18 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.only(bottom: 30),
-                  height: 50,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(50)),
-                    color: Styles.buttonsColor,
+                  child: ElevatedButton(
+                      onPressed: (){
+
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(150, 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        backgroundColor: Styles.buttonsColor,
+                      ),
+                      child: Text("Continue Game")
                   ),
-                  child: TextButton(
-                    onPressed: (){},
-                    child: Text("Continue a game", style: TextStyle(color: Colors.white),),
-                  ),
-                )
+                ),
               ],
             )
           ],

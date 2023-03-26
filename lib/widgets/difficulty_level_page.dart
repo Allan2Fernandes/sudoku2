@@ -56,7 +56,7 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
           )
         ],
         backgroundColor: Styles.themeColor,
-        title: Text("Difficulty"),
+        title: Text("SuDoKu"),
         centerTitle: true,
       ),
     body: Center(
@@ -106,10 +106,10 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(MediaQuery.of(context).size.width*0.2,0,0,0),
                   child: Row(
-                    children: [
+                    children: const [
                       Icon(Icons.signal_cellular_alt_2_bar, color: Colors.yellow, size: 30,),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(15,0,0,0),
+                        padding: EdgeInsets.fromLTRB(15,0,0,0),
                         child: Text("Medium", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 40),),
                       ),
                     ],
@@ -129,10 +129,10 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(MediaQuery.of(context).size.width*0.2,0,0,0),
                   child: Row(
-                    children: [
+                    children: const [
                       Icon(Icons.signal_cellular_alt_sharp, color: Colors.red, size: 30,),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20,0,0,0),
+                        padding: EdgeInsets.fromLTRB(20,0,0,0),
                         child: Text("Hard", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 40),),
                       ),
                     ],
@@ -148,10 +148,10 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Styles.buttonsColor,
-                      minimumSize: Size(60, 60),
+                      minimumSize: const Size(60, 60),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
-                    child: Transform.rotate(angle: pi, child: Icon(Icons.keyboard_arrow_right,),)
+                    child: Transform.rotate(angle: pi, child: const Icon(Icons.keyboard_arrow_right,),)
                 ),
                 ElevatedButton(
                     onPressed: (){
@@ -162,23 +162,23 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Styles.buttonsColor,
-                      minimumSize: Size(150, 60),
+                      minimumSize: const Size(150, 60),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))
                     ),
 
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                      children: const [
                         Text("Start Game"),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                          padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
                           child: Icon(FluentSystemIcons.ic_fluent_arrow_forward_filled),
                         )
                       ],
                     )
                 )
               ],
-            ),//Go back or procedd to new game
+            ),//Go back or proceed to new game
           ],
         ),
       ),

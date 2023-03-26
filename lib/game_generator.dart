@@ -2,38 +2,75 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:sudoku2/difficulty_level.dart';
+import 'package:sudoku_solver_generator/sudoku_solver_generator.dart';
 
 class GameGenerator{
   List<List<String>>? gameBoard;
+  List<List<String>>? solutionBoard;
   List<List<bool>>? originalValues;
   String boardAsString = "";
+  String boardSolutionAsString = "";
   GameGenerator(){
     gameBoard = List.generate(9, (rowIndex) =>
+        List.generate(9, (columnIndex) => "0")
+    );
+    solutionBoard = List.generate(9, (rowIndex) =>
         List.generate(9, (columnIndex) => "0")
     );
     originalValues = List.generate(9, (rowIndex) =>
         List.generate(9, (columnIndex)=> false)
     );
-    fetchBoardFromAPI();
+    //fetchBoardFromAPI();
+    createBoardFromPackage();
   }
 
-  String getRankFromMode(){
+  int getRankFromMode(){
     if(DifficultyLevel.setDifficulty == 'Easy'){
-      return "25";
+      return 25;
     }else if(DifficultyLevel.setDifficulty == 'Medium'){
-      return "75";
+      return 45;
     }else if(DifficultyLevel.setDifficulty == "Hard"){
-      return "125";
+      return 54;
     }
-    return "0";
+    return 0;
   }
 
+  void createBoardFromPackage(){
+    var sudokuGenerator = SudokuGenerator(emptySquares: getRankFromMode());
+    var board = sudokuGenerator.newSudoku;
+    var solutionBoard = SudokuSolver.solve(board);
+    convertIntBoardToString(board);
+    convertIntSolutionBoardToString(solutionBoard);
+  }
 
-  Future<void> fetchBoardFromAPI() async {
-    String rank = getRankFromMode();
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/SudokuGenerator/$rank'));
-    boardAsString = jsonDecode(response.body)['board'];
-    convertStringToGameBoard();
+  // Future<void> fetchBoardFromAPI() async {
+  //   String rank = getRankFromMode();
+  //   final response = await http.get(Uri.parse('http://10.0.2.2:8000/SudokuGenerator/$rank'));
+  //   boardAsString = jsonDecode(response.body)['board'];
+  //   boardSolutionAsString = jsonDecode(response.body)['solution'];
+  //   convertStringToGameBoard();
+  //   convertStringToSolutionBoard();
+  // }
+
+  void convertIntBoardToString(var board){
+    for(int rowNum = 0; rowNum < 9; rowNum++){
+      for(int columnNum = 0; columnNum < 9; columnNum++){
+        if(board[rowNum][columnNum] == 0){
+          gameBoard![rowNum][columnNum] = "";
+        }else{
+          originalValues![rowNum][columnNum] = true;
+          gameBoard![rowNum][columnNum] = board[rowNum][columnNum].toString();
+        }
+      }
+    }
+  }
+
+  void convertIntSolutionBoardToString(var solutionBoard){
+    for(int rowNum = 0; rowNum < 9; rowNum++){
+      for(int columnNum = 0; columnNum < 9; columnNum++){
+        this.solutionBoard![rowNum][columnNum] = solutionBoard[rowNum][columnNum].toString();
+      }
+    }
   }
 
   void convertStringToGameBoard(){
@@ -48,6 +85,17 @@ class GameGenerator{
           value = boardAsString[pointer];
         }
         gameBoard![i][j] = value;
+        pointer++;
+      }
+    }
+  }
+
+  void convertStringToSolutionBoard(){
+    int pointer = 0;
+    for(int i= 0; i < 9; i++){
+      for(int j = 0; j < 9; j++){
+        String value = boardSolutionAsString[pointer];
+        solutionBoard![i][j] = value;
         pointer++;
       }
     }
@@ -110,6 +158,11 @@ class GameGenerator{
   }
 
   List<List<String>>? getGameBoard(){
+    //Convert every element to string
+
     return gameBoard;
+  }
+  List<List<String>>? getSolutionBoard(){
+    return solutionBoard;
   }
 }
