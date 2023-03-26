@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sudoku2/database_classes/database.dart';
 import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/widgets/game_page.dart';
-
 import '../Styles.dart';
 
 class DifficultyLevelSelector extends StatefulWidget {
@@ -154,7 +155,9 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                     child: Transform.rotate(angle: pi, child: const Icon(Icons.keyboard_arrow_right,),)
                 ),
                 ElevatedButton(
-                    onPressed: (){
+                    onPressed: () async {
+                      DataBaseHandler dbHandler = DataBaseHandler();
+                      dbHandler.getNewGameID();
                       Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context)=> GamePage(isLoadedGame: false,))
@@ -165,7 +168,6 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                       minimumSize: const Size(150, 60),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))
                     ),
-
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [

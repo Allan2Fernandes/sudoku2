@@ -48,4 +48,16 @@ class DataBaseHandler{
     await database.rawQuery("INSERT INTO savedGames(gameElementStates, solutionElementStates, originalValues, correctValuesIndices, secondsCounter, difficultyLevel, numberMistakes)"
         "VALUES('${gameElementStatesConverted}', '${solutionElementStatesConverted}', '${originalValuesConverted}', '${isCorrectValuesAtIndex}', '${durationString}', '${difficultyLevel}', ${numberMistakes})");
   }
+  
+  Future<int> getNewGameID() async {
+    int newID = 0;
+    final database = await initializedDB();
+    var newGameID = await database.rawQuery("SELECT MAX(savedGameID) FROM savedGames");
+    String newGameIDAsString = newGameID[0]['MAX(savedGameID)'].toString();
+    if(newGameIDAsString != 'null'){
+      newID = int.parse(newGameIDAsString);
+    }
+    newID = newID + 1;
+    return newID;
+  }
 }
