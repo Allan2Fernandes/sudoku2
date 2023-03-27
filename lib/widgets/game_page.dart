@@ -12,11 +12,12 @@ import 'package:tuple/tuple.dart';
 
 class GamePage extends StatefulWidget {
   bool isLoadedGame;
+  int gameID;
 
-  GamePage({Key? key, required this.isLoadedGame}) : super(key: key);
+  GamePage({Key? key, required this.isLoadedGame, required this.gameID}) : super(key: key);
 
   @override
-  State<GamePage> createState() => _GamePageState(isLoadedGame);
+  State<GamePage> createState() => _GamePageState(isLoadedGame, gameID);
 }
 
 class _GamePageState extends State<GamePage> {
@@ -37,9 +38,10 @@ class _GamePageState extends State<GamePage> {
   GameGenerator gameGenerator= GameGenerator();
   int numVacancies = 0;
   bool? isLoadedGame;
+  int? gameID;
 
   //Constructor
-  _GamePageState(bool isLoadedGame){
+  _GamePageState(bool isLoadedGame, int gameID){
     gameElementStates = gameGenerator.getGameBoard();
     solutionElementStates = gameGenerator.getSolutionBoard();
     this.originalValues = gameGenerator.originalValues;
@@ -48,6 +50,7 @@ class _GamePageState extends State<GamePage> {
     );
     startTimer(0);
     this.isLoadedGame = isLoadedGame;
+    this.gameID = gameID;
   }
 
 
@@ -381,7 +384,7 @@ class _GamePageState extends State<GamePage> {
                         countNumVacancies();
                         print("Updating database here");
                         DataBaseHandler dbHandler = DataBaseHandler();
-                        dbHandler.SaveGame(gameElementStates, solutionElementStates, originalValues, isCorrectValueAtIndex, durationString, DifficultyLevel.setDifficulty, numMistakes);
+                        dbHandler.saveTheGame(gameID!, gameElementStates, solutionElementStates, originalValues, isCorrectValueAtIndex, durationString, DifficultyLevel.setDifficulty, numMistakes);
                       },
                           child: Text((index+1).toString(),
                             style: TextStyle(
