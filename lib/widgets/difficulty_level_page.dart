@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sudoku2/database_classes/database.dart';
 import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/widgets/game_page.dart';
@@ -157,10 +156,9 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                 ElevatedButton(
                     onPressed: () async {
                       DataBaseHandler dbHandler = DataBaseHandler();
-                      int newGamesID = await dbHandler.getNewGameID() as int;
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=> GamePage(isLoadedGame: false, gameID: newGamesID,))
+                          MaterialPageRoute(builder: (context)=> GamePage(isLoadedGame: false,))
                       );
                     },
                     style: ElevatedButton.styleFrom(

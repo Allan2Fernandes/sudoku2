@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sudoku2/Styles.dart';
 import 'package:sudoku2/database_classes/database.dart';
 import 'package:sudoku2/database_classes/database_conversions.dart';
+import 'package:sudoku2/database_classes/saved_game_entry.dart';
 import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/game_generator.dart';
 import 'package:tuple/tuple.dart';
@@ -12,12 +13,11 @@ import 'package:tuple/tuple.dart';
 
 class GamePage extends StatefulWidget {
   bool isLoadedGame;
-  int gameID;
 
-  GamePage({Key? key, required this.isLoadedGame, required this.gameID}) : super(key: key);
+  GamePage({Key? key, required this.isLoadedGame}) : super(key: key);
 
   @override
-  State<GamePage> createState() => _GamePageState(isLoadedGame, gameID);
+  State<GamePage> createState() => _GamePageState(isLoadedGame);
 }
 
 class _GamePageState extends State<GamePage> {
@@ -41,7 +41,7 @@ class _GamePageState extends State<GamePage> {
   int? gameID;
 
   //Constructor
-  _GamePageState(bool isLoadedGame, int gameID){
+  _GamePageState(bool isLoadedGame){
     gameElementStates = gameGenerator.getGameBoard();
     solutionElementStates = gameGenerator.getSolutionBoard();
     this.originalValues = gameGenerator.originalValues;
@@ -50,10 +50,35 @@ class _GamePageState extends State<GamePage> {
     );
     startTimer(0);
     this.isLoadedGame = isLoadedGame;
-    this.gameID = gameID;
   }
 
+  void saveTheGame() async {
+    //If the gameID is null,
+    //Get the game id from the database and set gameID to the retrieved iD
+    if(this.gameID == null){
+      this.gameID = await DataBaseHandler.getNewGameID();
+    }
 
+    String gameElementStatesConverted = DatabaseConversion.convertStringListToString(gameElementStates);
+    String solutionElementStatesConverted = DatabaseConversion.convertStringListToString(solutionElementStates);
+    String originalValuesConverted = DatabaseConversion.convertBoolListToString(originalValues);
+    String isCorrectValuesAtIndex = DatabaseConversion.convertBoolListToString(isCorrectValueAtIndex);
+    SavedGameEntry savedGameEntry = SavedGameEntry(
+        this.gameID!,
+        gameElementStatesConverted,
+        solutionElementStatesConverted,
+        originalValuesConverted,
+        isCorrectValuesAtIndex,
+        durationString,
+        DifficultyLevel.setDifficulty,
+        numMistakes,
+        DateTime.now().toString()
+    );
+    int savedGameID = await DataBaseHandler.createSavedGame(savedGameEntry);
+    setState(() {
+      this.gameID = savedGameID;
+    });
+  }
 
   void startTimer(int startValue){
     timer = Timer.periodic(const Duration(seconds: 1), (timer) => { addTime()});
@@ -373,19 +398,17 @@ class _GamePageState extends State<GamePage> {
                       width: MediaQuery.of(context).size.width/10,
                       child: TextButton(
                         onPressed: (){
-                        if(isShowingSolution){
-                          return;
-                        }
-                        if(currentlySelectedRowIndex == -1 || currentlySelectedColumnIndex == -1){
-                          return;
-                        }
-                        int numberSelection = index+1;
-                        updateElementState(numberSelection);
-                        countNumVacancies();
-                        print("Updating database here");
-                        DataBaseHandler dbHandler = DataBaseHandler();
-                        dbHandler.saveTheGame(gameID!, gameElementStates, solutionElementStates, originalValues, isCorrectValueAtIndex, durationString, DifficultyLevel.setDifficulty, numMistakes);
-                      },
+                          if(isShowingSolution){
+                            return;
+                          }
+                          if(currentlySelectedRowIndex == -1 || currentlySelectedColumnIndex == -1){
+                            return;
+                          }
+                          int numberSelection = index+1;
+                          updateElementState(numberSelection);
+                          countNumVacancies();
+                          saveTheGame();
+                        },
                           child: Text((index+1).toString(),
                             style: TextStyle(
                                 fontSize: 50,

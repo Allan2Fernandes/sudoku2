@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sudoku2/Styles.dart';
 import 'package:sudoku2/difficulty_level.dart';
 import 'package:sudoku2/widgets/game_page.dart';
+import 'package:sudoku2/widgets/saved_game_picker_page.dart';
 
 import 'difficulty_level_page.dart';
 
@@ -53,7 +54,10 @@ class _HomePageState extends State<HomePage> {
                   margin: EdgeInsets.only(bottom: 30),
                   child: ElevatedButton(
                       onPressed: (){
-
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context)=> SavedGamePicker())
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(150, 50),
