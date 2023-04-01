@@ -165,4 +165,16 @@ class GameGenerator{
   List<List<String>>? getSolutionBoard(){
     return solutionBoard;
   }
+
+  void setGameBoard(List<List<String>> gameBoard){
+    this.gameBoard = gameBoard;
+  }
+
+  void setSolutionBoard(List<List<String>> solutionGameBoard){
+    this.solutionBoard = solutionGameBoard;
+  }
+
+  void setOriginalValues(List<List<bool>> originalValues){
+    this.originalValues = originalValues;
+  }
 }

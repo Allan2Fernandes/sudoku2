@@ -13,11 +13,18 @@ import 'package:tuple/tuple.dart';
 
 class GamePage extends StatefulWidget {
   bool isLoadedGame;
+  int? gameID;
+  List<List<String>>? gameElementStates;
+  List<List<bool>>? originalValues;
+  List<List<bool>>? isCorrectValueAtIndex;
+  List<List<String>>? solutionElementStates;
+  String? durationString;
+  int? numMistakes;
 
-  GamePage({Key? key, required this.isLoadedGame}) : super(key: key);
+  GamePage({Key? key, required this.isLoadedGame, this.gameID, this.gameElementStates, this.originalValues, this.isCorrectValueAtIndex, this.solutionElementStates, this.durationString, this.numMistakes}) : super(key: key);
 
   @override
-  State<GamePage> createState() => _GamePageState(isLoadedGame);
+  State<GamePage> createState() => _GamePageState(isLoadedGame, gameID, gameElementStates, originalValues, isCorrectValueAtIndex, solutionElementStates, durationString, numMistakes);
 }
 
 class _GamePageState extends State<GamePage> {
@@ -37,19 +44,46 @@ class _GamePageState extends State<GamePage> {
   bool isShowingSolution = false;
   GameGenerator gameGenerator= GameGenerator();
   int numVacancies = 0;
+
+  //Incoming saved details
   bool? isLoadedGame;
   int? gameID;
 
   //Constructor
-  _GamePageState(bool isLoadedGame){
-    gameElementStates = gameGenerator.getGameBoard();
-    solutionElementStates = gameGenerator.getSolutionBoard();
-    this.originalValues = gameGenerator.originalValues;
-    isCorrectValueAtIndex = List.generate(9, (rowIndex) =>
-        List.generate(9, (columnIndex)=> true)
-    );
-    startTimer(0);
+  _GamePageState(bool isLoadedGame, int? gameID, List<List<String>>? gameElementStates, List<List<bool>>? originalValues, List<List<bool>>? isCorrectValueAtIndex, List<List<String>>? solutionElementStates, String? durationString, int? numMistakes){
     this.isLoadedGame = isLoadedGame;
+    if(isLoadedGame){
+      this.gameID = gameID;
+      this.gameElementStates = gameElementStates;
+      gameGenerator.setGameBoard(this.gameElementStates!);
+      this.originalValues = originalValues;
+      gameGenerator.setOriginalValues(this.originalValues!);
+      this.isCorrectValueAtIndex = isCorrectValueAtIndex;
+      this.solutionElementStates = solutionElementStates;
+      gameGenerator.setSolutionBoard(this.solutionElementStates!);
+      this.durationString = durationString!;
+      this.numMistakes = numMistakes!;
+      //Get the amount of seconds from the duration string
+      int totalSeconds = getNumSecondsFromDurationString(durationString);
+      //Start the timer with those number of seconds
+      startTimer(totalSeconds);
+    }else{
+      this.gameElementStates = gameGenerator.getGameBoard();
+      this.solutionElementStates = gameGenerator.getSolutionBoard();
+      this.originalValues = gameGenerator.originalValues;
+      this.isCorrectValueAtIndex = List.generate(9, (rowIndex) =>
+          List.generate(9, (columnIndex)=> true)
+      );
+      startTimer(0);
+    }
+  }
+
+  int getNumSecondsFromDurationString(String durationString){
+    String minutesSubString = durationString.substring(0, 2);
+    String secondsSubString = durationString.substring(3);
+    int numMinutes = int.parse(minutesSubString);
+    int numSeconds = int.parse(secondsSubString);
+    return numMinutes*60 + numSeconds;
   }
 
   void saveTheGame() async {
@@ -119,6 +153,10 @@ class _GamePageState extends State<GamePage> {
       isShowingSolution = true;
     });
     timer?.cancel();
+    //Delete the game from the database
+    if(gameID != null){
+      DataBaseHandler.deleteSavedGame(gameID!);
+    }
   }
 
   void countNumVacancies(){

@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku2/database_classes/database.dart';
 import 'package:sudoku2/database_classes/database_conversions.dart';
+import 'package:glassmorphism/glassmorphism.dart';
 
 import '../Styles.dart';
+import 'game_page.dart';
 
 class SavedGameSrcollSingleView extends StatefulWidget {
   Map<String, dynamic> savedGameInfo;
@@ -11,7 +13,7 @@ class SavedGameSrcollSingleView extends StatefulWidget {
   SavedGameSrcollSingleView({Key? key, required this.savedGameInfo}) : super(key: key);
 
   @override
-  State<SavedGameSrcollSingleView> createState() => _SavedGameSrcollSingleViewState(this.savedGameInfo);
+  State<SavedGameSrcollSingleView> createState() => _SavedGameSrcollSingleViewState(savedGameInfo);
 }
 
 class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
@@ -20,6 +22,7 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
   List<List<String>>? gameElementStates;
   List<List<bool>>? originalValues;
   List<List<bool>>? isCorrectValueAtIndex;
+  List<List<String>>? solutionElementStates;
   String? durationString;
   String? difficultyLevel;
   int? numberMistakes;
@@ -35,6 +38,7 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
     gameElementStates = DatabaseConversion.convertStringToStringList(this.savedGameInfo!['gameElementStates']);
     originalValues = DatabaseConversion.convertStringToBoolList(this.savedGameInfo!['originalValues']);
     isCorrectValueAtIndex = DatabaseConversion.convertStringToBoolList(this.savedGameInfo!['correctValuesIndices']);
+    solutionElementStates = DatabaseConversion.convertStringToStringList(this.savedGameInfo!['solutionElementStates']);
     durationString = this.savedGameInfo!['durationString'].toString();
     difficultyLevel = this.savedGameInfo!['difficultyLevel'].toString();
     numberMistakes = int.parse(this.savedGameInfo!['numberMistakes'].toString());
@@ -61,6 +65,17 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
     }
   }
 
+  Color getTabletColorOnDifficulty(){
+    if(difficultyLevel == 'Hard'){
+      return Color(0xFFdb8184);
+    }else if(difficultyLevel == 'Medium'){
+      return Color(0xFFd9d97c);
+    }else if(difficultyLevel == 'Easy'){
+      return Color(0xFF6bab65);
+    }
+    return Color(0xFF000000);
+  }
+
 
 
 
@@ -81,7 +96,7 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
       //     ]
       // ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container( //Board container
               height: MediaQuery.of(context).size.width.floorToDouble()*cardScaleFactor,
@@ -122,105 +137,157 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                 ),
               ),
           ),
-          Container(
-            margin: EdgeInsets.only(top: 50),
+          GlassmorphicContainer(
             width: MediaQuery.of(context).size.width*cardScaleFactor,
-            height: MediaQuery.of(context).size.width*cardScaleFactor*0.8,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(50)),
-                color: Colors.grey
-            ),
-            child: Column(
-              children: [
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.start,
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 30, top: 15),
-                //       child: Text("ID ${this.savedGameID}"),
-                //     )
-                //   ],
-                // ),
-                // //Time
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 30, top: 15),
-                //       child: Text("Difficulty: $difficultyLevel"),
-                //     ),
-                //   ],
-                // ),
-                // Row(
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 30, top: 15),
-                //       child: Text("Mistakes: ${this.numberMistakes}"),
-                //     )
-                //   ],
-                // ),
-                // Row(
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 30, top: 15),
-                //       child: Text("Duration: ${durationString}"),
-                //     )
-                //   ],
-                // ),
-                // Row(
-                //   children: [
-                //     Container(
-                //       margin: EdgeInsets.only(left: 30, top: 15),
-                //       child: Text("Saved on ${saveTime?.day}/${saveTime?.month}/${saveTime?.year} at ${saveTime?.hour}:${saveTime?.minute}"),
-                //     )
-                //   ],
-                // ),
-                // Container(
-                //   margin: EdgeInsets.only(left: 25, right: 50),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Container(
-                //           margin: EdgeInsets.only(left: 30, top: 25),
-                //           child: ElevatedButton(
-                //             style: ElevatedButton.styleFrom(
-                //               minimumSize: Size(50, 50),
-                //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                //               backgroundColor: Styles.buttonsColor,
-                //             ),
-                //             onPressed: () {
-                //               DataBaseHandler.deleteSavedGame(savedGameID!);
-                //             },
-                //             child: Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //               children: [
-                //                 Icon(Icons.delete_forever, size: 18,),
-                //               ],
-                //             ),
-                //           )
-                //       ),
-                //       Container(
-                //           margin: EdgeInsets.only(left: 30, top: 25),
-                //           child: ElevatedButton(
-                //             style: ElevatedButton.styleFrom(
-                //               minimumSize: Size(150, 50),
-                //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                //               backgroundColor: Styles.buttonsColor,
-                //             ),
-                //             onPressed: () {  },
-                //             child: Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //               children: [
-                //                 Padding(padding: EdgeInsets.only(right: 15), child: Text("Continue game"),),
-                //                 Icon(Icons.arrow_forward_rounded),
-                //               ],
-                //             ),
-                //           )
-                //       ),
-                //     ],
-                //   ),
-                // )
+            height: MediaQuery.of(context).size.width*cardScaleFactor*0.85,
+            borderRadius: 25,
+            linearGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Styles.themeColor.withAlpha(50),
+                getTabletColorOnDifficulty().withAlpha(100)
               ],
+              stops: [
+              0.3,
+              1,
+              ]),
+            border: 0,
+            blur: 7,
+            borderGradient: LinearGradient(
+                begin: Alignment.bottomRight,
+                end: Alignment.topLeft,
+                colors: [
+                  Color(0xFF4579C5).withAlpha(100),
+                  Color(0xFFFFFFF).withAlpha(55),
+                  Color(0xFFF75035).withAlpha(10),
+                ],
+                stops: [
+                  0.06,
+                  0.95,
+                  1
+                ]),
+            child: Container(
+              // margin: EdgeInsets.only(top: 50),
+              // width: MediaQuery.of(context).size.width*cardScaleFactor,
+              // height: MediaQuery.of(context).size.width*cardScaleFactor*0.8,
+
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     color: Colors.blueGrey,
+                  //     offset: Offset(0.0, 10.0), //(x,y)
+                  //     blurRadius: 5.0,
+                  //   )
+                  // ]
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 30, top: 15),
+                        child: Text("# ${this.savedGameID}", style: Styles.savedGamesTextStyle,),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 30, top: 15),
+                        child: Text("Difficulty: $difficultyLevel", style: Styles.savedGamesTextStyle,),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 30, top: 15),
+                        child: Text("Mistakes: ${this.numberMistakes}", style: Styles.savedGamesTextStyle,),
+                      ),
+
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 30, top: 15),
+                        child: Text("Duration: ${durationString}", style: Styles.savedGamesTextStyle,),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 30, top: 15),
+                        child: Text("Saved on ${saveTime?.day}/${saveTime?.month}/${saveTime?.year} at ${saveTime?.hour}:${saveTime?.minute}", style: Styles.savedGamesTextStyle,),
+                      )
+                    ],
+                  ),
+                  Container( //Both buttons container --------------------
+                    margin: EdgeInsets.only(left: 15, right: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                            margin: EdgeInsets.only(left: 0, top: 25),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                                backgroundColor: Styles.buttonsColor,
+                              ),
+                              onPressed: () {
+                                DataBaseHandler.deleteSavedGame(savedGameID!);
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Icon(Icons.delete_forever, size: 18,),
+                                ],
+                              ),
+                            )
+                        ),
+                        Container(
+                            margin: EdgeInsets.only(left: 30, top: 25),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(155, 50),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                                backgroundColor: Styles.buttonsColor,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context)=>
+                                        GamePage(
+                                          isLoadedGame: true,
+                                          gameID: savedGameID,
+                                          gameElementStates: gameElementStates,
+                                          isCorrectValueAtIndex: isCorrectValueAtIndex,
+                                          originalValues: originalValues,
+                                          solutionElementStates: solutionElementStates,
+                                          durationString: durationString,
+                                          numMistakes: numberMistakes,
+                                        )
+                                    )
+                                );
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(padding: EdgeInsets.only(right: 15), child: Text("Continue game"),),
+                                  Icon(Icons.arrow_forward_rounded),
+                                ],
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           )
         ],

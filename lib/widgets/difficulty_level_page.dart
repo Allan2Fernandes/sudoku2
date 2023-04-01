@@ -155,10 +155,19 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                 ),
                 ElevatedButton(
                     onPressed: () async {
-                      DataBaseHandler dbHandler = DataBaseHandler();
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=> GamePage(isLoadedGame: false,))
+                          MaterialPageRoute(builder: (context)=> GamePage(
+                              isLoadedGame: false,
+                              durationString: "",
+                              gameElementStates: <List<String>>[],
+                              gameID: null,
+                              isCorrectValueAtIndex: <List<bool>>[],
+                              originalValues: <List<bool>>[],
+                              numMistakes: 0,
+                              solutionElementStates: <List<String>>[],
+                          )
+                          )
                       );
                     },
                     style: ElevatedButton.styleFrom(

@@ -33,6 +33,7 @@ dependencies:
   sudoku_solver_generator: ^2.0.0
   path: ^1.8.0
   sqflite: ^2.0.0+4
+  glassmorphism: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
