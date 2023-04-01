@@ -1,3 +1,4 @@
+import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku2/database_classes/database.dart';
@@ -9,8 +10,9 @@ import 'game_page.dart';
 
 class SavedGameSrcollSingleView extends StatefulWidget {
   Map<String, dynamic> savedGameInfo;
+  Function(int savedGameID)? onDelete;
 
-  SavedGameSrcollSingleView({Key? key, required this.savedGameInfo}) : super(key: key);
+  SavedGameSrcollSingleView({Key? key, required this.savedGameInfo, required this.onDelete}) : super(key: key);
 
   @override
   State<SavedGameSrcollSingleView> createState() => _SavedGameSrcollSingleViewState(savedGameInfo);
@@ -67,16 +69,26 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
 
   Color getTabletColorOnDifficulty(){
     if(difficultyLevel == 'Hard'){
-      return Color(0xFFdb8184);
+      return Color(0xFFA65151);
     }else if(difficultyLevel == 'Medium'){
-      return Color(0xFFd9d97c);
+      return Color(0xFFCFC833);
     }else if(difficultyLevel == 'Easy'){
       return Color(0xFF6bab65);
     }
     return Color(0xFF000000);
   }
 
-
+  Color getButtonColorOnDifficulty(){
+    return Color(0xFF6bab65);
+    // if(difficultyLevel == 'Hard'){
+    //   return Color(0xFFA65151);
+    // }else if(difficultyLevel == 'Medium'){
+    //   return Color(0xFFCFC833);
+    // }else if(difficultyLevel == 'Easy'){
+    //   return Color(0xFF6bab65);
+    // }
+    // return Color(0xFF000000);
+  }
 
 
   @override
@@ -186,14 +198,19 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 30, top: 15),
-                        child: Text("# ${this.savedGameID}", style: Styles.savedGamesTextStyle,),
+                        child: Row(
+                          children: [
+                            Icon(Icons.tag),
+                            Text(" ${this.savedGameID}", style: Styles.savedGamesTextStyle,),
+                          ],
+                        )
                       ),
                       Container(
-                        margin: EdgeInsets.only(left: 30, top: 15),
+                        margin: EdgeInsets.only(left: 30, top: 15, right: 30),
                         child: Text("Difficulty: $difficultyLevel", style: Styles.savedGamesTextStyle,),
                       ),
                     ],
@@ -203,7 +220,12 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 30, top: 15),
-                        child: Text("Mistakes: ${this.numberMistakes}", style: Styles.savedGamesTextStyle,),
+                        child: Row(
+                          children: [
+                            Icon(Icons.close_rounded, color: Colors.red),
+                            Text(" ${this.numberMistakes}", style: Styles.savedGamesTextStyle,)
+                          ],
+                        ),
                       ),
 
                     ],
@@ -212,7 +234,12 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 30, top: 15),
-                        child: Text("Duration: ${durationString}", style: Styles.savedGamesTextStyle,),
+                        child: Row(
+                          children: [
+                            Icon(Icons.hourglass_top_rounded, color: Color(0xFF262626),),
+                            Text(" ${durationString}", style: Styles.savedGamesTextStyle,)
+                          ],
+                        ),
                       )
                     ],
                   ),
@@ -221,17 +248,22 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 30, top: 15),
-                        child: Text("Saved on ${saveTime?.day}/${saveTime?.month}/${saveTime?.year} at ${saveTime?.hour}:${saveTime?.minute}", style: Styles.savedGamesTextStyle,),
+                        child: Row(
+                          children: [
+                            Icon(Icons.save, color: Color(0xFF262626),),
+                            Text(" ${saveTime?.day}/${saveTime?.month}/${saveTime?.year} at ${saveTime!.hour>=10?saveTime!.hour:"0${saveTime!.hour}"}:${saveTime!.minute>=10?saveTime!.minute:"0${saveTime!.minute}"}", style: Styles.savedGamesTextStyle,)
+                          ],
+                        ),
                       )
                     ],
                   ),
                   Container( //Both buttons container --------------------
-                    margin: EdgeInsets.only(left: 15, right: 15),
+                    margin: EdgeInsets.only(left: 15, right: 15, top: 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                            margin: EdgeInsets.only(left: 0, top: 25),
+                            margin: EdgeInsets.only(left: 0),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: Size(50, 50),
@@ -239,7 +271,8 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                                 backgroundColor: Styles.buttonsColor,
                               ),
                               onPressed: () {
-                                DataBaseHandler.deleteSavedGame(savedGameID!);
+                                print("Deleting at index $savedGameID");
+                                widget.onDelete!(savedGameID!);
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -250,12 +283,12 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                             )
                         ),
                         Container(
-                            margin: EdgeInsets.only(left: 30, top: 25),
+                            margin: EdgeInsets.only(left: 30),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: Size(155, 50),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                                backgroundColor: Styles.buttonsColor,
+                                backgroundColor: getButtonColorOnDifficulty(),
                               ),
                               onPressed: () {
                                 Navigator.push(
@@ -270,6 +303,7 @@ class _SavedGameSrcollSingleViewState extends State<SavedGameSrcollSingleView> {
                                           solutionElementStates: solutionElementStates,
                                           durationString: durationString,
                                           numMistakes: numberMistakes,
+                                          difficultyLevel: difficultyLevel,
                                         )
                                     )
                                 );

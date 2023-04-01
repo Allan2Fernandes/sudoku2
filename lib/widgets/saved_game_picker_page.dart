@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku2/Styles.dart';
@@ -18,6 +20,8 @@ class _SavedGamePickerState extends State<SavedGamePicker> {
   List<Map<String, dynamic>> listOfSavedGames = [];
   bool isLoading = true;
 
+
+
   void refreshListOfSavedGames() async {
     final data = await DataBaseHandler().getAllSavedGames(); //Consider using a THEN here if there are problems
     setState(() {
@@ -32,7 +36,6 @@ class _SavedGamePickerState extends State<SavedGamePicker> {
     //Get all saved games here. Set state here
     refreshListOfSavedGames();
   }
-
 
 
   @override
@@ -60,13 +63,20 @@ class _SavedGamePickerState extends State<SavedGamePicker> {
             )
           ],
         ),
-        body: isLoading? Center(child: CircularProgressIndicator()):listOfSavedGames.length!=0?SingleChildScrollView(
+        body: isLoading? Center(child: CircularProgressIndicator()):listOfSavedGames.isNotEmpty?SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Row(
-                  children: this.listOfSavedGames.map((singleSavedGame) => SavedGameSrcollSingleView(savedGameInfo: singleSavedGame)).toList(),
+                  children: this.listOfSavedGames.map((singleSavedGame) => SavedGameSrcollSingleView(key: Key(singleSavedGame['savedGameID'].toString()), savedGameInfo: singleSavedGame, onDelete: (int savedGameID) async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    await DataBaseHandler.deleteSavedGame(savedGameID);
+                    refreshListOfSavedGames();
+                  },
+                  )).toList(),
                 ),
               ],
             )

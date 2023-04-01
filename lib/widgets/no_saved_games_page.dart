@@ -45,27 +45,27 @@ class NoSavedGamesPage extends StatelessWidget {
                         backgroundColor: Styles.buttonsColor,
                       ),
                     ),
-                    ElevatedButton(
-                        onPressed: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context)=> const DifficultyLevelSelector())
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(60, 60),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          backgroundColor: Styles.buttonsColor,
-                        ),
-                        child: Container(
-                          child: Row(
-                            children: [
-                              Text("New Game"),
-                              Icon(Icons.arrow_forward)
-                            ],
-                          ),
-                        )
-                    )
+                    // ElevatedButton(
+                    //     onPressed: (){
+                    //       Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(builder: (context)=> const DifficultyLevelSelector())
+                    //       );
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       minimumSize: Size(60, 60),
+                    //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    //       backgroundColor: Styles.buttonsColor,
+                    //     ),
+                    //     child: Container(
+                    //       child: Row(
+                    //         children: [
+                    //           Text("New Game"),
+                    //           Icon(Icons.arrow_forward)
+                    //         ],
+                    //       ),
+                    //     )
+                    // )
                   ],
                 ),
               ),

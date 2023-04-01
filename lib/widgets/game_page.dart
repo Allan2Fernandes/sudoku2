@@ -20,11 +20,12 @@ class GamePage extends StatefulWidget {
   List<List<String>>? solutionElementStates;
   String? durationString;
   int? numMistakes;
+  String? difficultyLevel;
 
-  GamePage({Key? key, required this.isLoadedGame, this.gameID, this.gameElementStates, this.originalValues, this.isCorrectValueAtIndex, this.solutionElementStates, this.durationString, this.numMistakes}) : super(key: key);
+  GamePage({Key? key, required this.isLoadedGame, this.gameID, this.gameElementStates, this.originalValues, this.isCorrectValueAtIndex, this.solutionElementStates, this.durationString, this.numMistakes, this.difficultyLevel}) : super(key: key);
 
   @override
-  State<GamePage> createState() => _GamePageState(isLoadedGame, gameID, gameElementStates, originalValues, isCorrectValueAtIndex, solutionElementStates, durationString, numMistakes);
+  State<GamePage> createState() => _GamePageState(isLoadedGame, gameID, gameElementStates, originalValues, isCorrectValueAtIndex, solutionElementStates, durationString, numMistakes, difficultyLevel);
 }
 
 class _GamePageState extends State<GamePage> {
@@ -41,16 +42,19 @@ class _GamePageState extends State<GamePage> {
   int currentlySelectedColumnIndex = 0;
   String currentlySelectedNumber = "0";
   bool timerIsPaused = false;
+  bool isComplete = false;
   bool isShowingSolution = false;
   GameGenerator gameGenerator= GameGenerator();
   int numVacancies = 0;
+  String? difficultyLevel;
 
   //Incoming saved details
   bool? isLoadedGame;
   int? gameID;
 
   //Constructor
-  _GamePageState(bool isLoadedGame, int? gameID, List<List<String>>? gameElementStates, List<List<bool>>? originalValues, List<List<bool>>? isCorrectValueAtIndex, List<List<String>>? solutionElementStates, String? durationString, int? numMistakes){
+  _GamePageState(bool isLoadedGame, int? gameID, List<List<String>>? gameElementStates, List<List<bool>>? originalValues, List<List<bool>>? isCorrectValueAtIndex, List<List<String>>? solutionElementStates, String? durationString, int? numMistakes, String? difficultyLevel){
+    this.difficultyLevel = difficultyLevel;
     this.isLoadedGame = isLoadedGame;
     if(isLoadedGame){
       this.gameID = gameID;
@@ -104,9 +108,10 @@ class _GamePageState extends State<GamePage> {
         originalValuesConverted,
         isCorrectValuesAtIndex,
         durationString,
-        DifficultyLevel.setDifficulty,
+        difficultyLevel!,
         numMistakes,
-        DateTime.now().toString()
+        DateTime.now().toString(),
+        isComplete? 1 : 0
     );
     int savedGameID = await DataBaseHandler.createSavedGame(savedGameEntry);
     setState(() {
@@ -123,7 +128,7 @@ class _GamePageState extends State<GamePage> {
     const addSeconds = 1;
     setState(() {
       //Logic
-      if(timerIsPaused == false){
+      if(timerIsPaused == false || isComplete){
         final seconds = durationCounter.inSeconds + addSeconds;
         durationCounter = Duration(seconds: seconds);
       }
@@ -148,6 +153,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   void giveUpTheGame(){
+    if(isComplete){
+      return;
+    }
     setState(() {
       gameElementStates = solutionElementStates;
       isShowingSolution = true;
@@ -174,6 +182,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   void changeTimerIsPausedState(){
+    if(isComplete){
+      return;
+    }
     setState(() {
       timerIsPaused = !timerIsPaused;
     });
@@ -187,6 +198,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   Icon getPausePlayIcon(){
+    if(isComplete){
+      return const Icon(Icons.flag_circle_rounded, size: 20, color: Colors.greenAccent,);
+    }
     if(isShowingSolution){
       return const Icon(Icons.flag_circle_rounded, size: 20, color: Styles.topRowTextColor);
     }
@@ -213,6 +227,15 @@ class _GamePageState extends State<GamePage> {
       }else{                                                    //Color the wrongly inputted values red
         return TextStyle(color: Colors.red, fontSize: fontSize);
       }
+    }
+  }
+
+  bool determineIfComplete(){
+    if(gameElementStates.toString() == solutionElementStates.toString()){
+      timer?.cancel();
+      return true;
+    }else{
+      return false;
     }
   }
 
@@ -319,7 +342,7 @@ class _GamePageState extends State<GamePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(DifficultyLevel.setDifficulty, style: Styles.topRowTextStyles,),
+                  Text(difficultyLevel!, style: Styles.topRowTextStyles,),
                   Text("Mistakes: $numMistakes", style: Styles.topRowTextStyles,),
                   Row(
                     children: [
@@ -393,6 +416,9 @@ class _GamePageState extends State<GamePage> {
                   Column(
                     children: [
                       IconButton(onPressed: (){
+                        if(isComplete){
+                          return;
+                        }
                         if(isShowingSolution){
                           return;
                         }
@@ -436,6 +462,9 @@ class _GamePageState extends State<GamePage> {
                       width: MediaQuery.of(context).size.width/10,
                       child: TextButton(
                         onPressed: (){
+                          if(isComplete){
+                            return;
+                          }
                           if(isShowingSolution){
                             return;
                           }
@@ -446,6 +475,9 @@ class _GamePageState extends State<GamePage> {
                           updateElementState(numberSelection);
                           countNumVacancies();
                           saveTheGame();
+                          setState(() {
+                            isComplete = determineIfComplete();
+                          });
                         },
                           child: Text((index+1).toString(),
                             style: TextStyle(

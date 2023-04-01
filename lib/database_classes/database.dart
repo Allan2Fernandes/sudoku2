@@ -1,4 +1,3 @@
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:sudoku2/database_classes/saved_game_entry.dart';
 
@@ -18,7 +17,8 @@ class DataBaseHandler{
       durationString TEXT NOT NULL,
       difficultyLevel TEXT NOT NULL,
       numberMistakes INT NOT NULL,
-      saveTime TEXT NOT NULL
+      saveTime TEXT NOT NULL,
+      isComplete INT NOT NULL
       )
       """
     );
@@ -69,6 +69,6 @@ class DataBaseHandler{
 
   Future<List<Map<String, dynamic>>> getAllSavedGames() async{
     final db = await DataBaseHandler.db();
-    return db.query('savedGames', orderBy: 'savedGameID');
+    return db.query('savedGames', where: 'isComplete = ?', whereArgs: [0], orderBy: 'savedGameID');
   }
 }

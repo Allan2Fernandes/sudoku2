@@ -10,6 +10,7 @@ class SavedGameEntry{
   late String difficultyLevel;
   late int numberMistakes;
   late String saveTime;
+  late int isComplete;
 
   //Constructor
   SavedGameEntry(this.savedGameID,
@@ -20,7 +21,8 @@ class SavedGameEntry{
       this.durationString,
       this.difficultyLevel,
       this.numberMistakes,
-      this.saveTime
+      this.saveTime,
+      this.isComplete
       );
 
   Map<String, dynamic> getGameMap(){
@@ -33,7 +35,8 @@ class SavedGameEntry{
       'durationString': this.durationString,
       'difficultyLevel': this.difficultyLevel,
       'numberMistakes': this.numberMistakes,
-      'saveTime': this.saveTime
+      'saveTime': this.saveTime,
+      'isComplete': this.isComplete
     };
     return gameMap;
   }

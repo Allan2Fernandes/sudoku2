@@ -26,7 +26,7 @@ class GameGenerator{
 
   int getRankFromMode(){
     if(DifficultyLevel.setDifficulty == 'Easy'){
-      return 25;
+      return 1;
     }else if(DifficultyLevel.setDifficulty == 'Medium'){
       return 45;
     }else if(DifficultyLevel.setDifficulty == "Hard"){

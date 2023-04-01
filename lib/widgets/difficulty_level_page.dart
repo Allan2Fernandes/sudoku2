@@ -166,6 +166,7 @@ class _DifficultyLevelSelectorState extends State<DifficultyLevelSelector> {
                               originalValues: <List<bool>>[],
                               numMistakes: 0,
                               solutionElementStates: <List<String>>[],
+                              difficultyLevel: DifficultyLevel.setDifficulty,
                           )
                           )
                       );
